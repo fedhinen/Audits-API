@@ -6,10 +6,18 @@ echo "Starting Laravel Application..."
 # Esperar a que la base de datos esté lista (opcional pero recomendado)
 if [ "$DB_CONNECTION" = "mysql" ]; then
     echo "Waiting for database to be ready..."
+    counter=0
+    max_tries=30
     until php artisan migrate:status > /dev/null 2>&1 || [ $? -eq 1 ]; do
-        echo "Database is unavailable - sleeping"
+        counter=$((counter+1))
+        if [ $counter -gt $max_tries ]; then
+            echo "Database connection timeout. Continuing anyway..."
+            break
+        fi
+        echo "Database is unavailable - sleeping (attempt $counter/$max_tries)"
         sleep 2
     done
+    echo "Database is ready!"
 fi
 
 # Ejecutar migraciones (opcional - comentar si prefieres hacerlo manual)
