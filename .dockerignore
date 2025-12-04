@@ -1,0 +1,55 @@
+# Ignorar archivos innecesarios para reducir tamaño y velocidad de build
+.git
+.gitignore
+.gitattributes
+.env
+.env.*
+.editorconfig
+
+# Node
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Build artifacts
+/public/hot
+/public/storage
+/storage/*.key
+
+# Vendor (se instala en el contenedor)
+/vendor
+
+# IDEs
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Testing
+.phpunit.result.cache
+/coverage
+
+# Logs
+*.log
+/storage/logs/*
+
+# Cache
+/bootstrap/cache/*
+/storage/framework/cache/*
+/storage/framework/sessions/*
+/storage/framework/views/*
+
+# Docs
+README.md
+CHANGELOG.md
+docs/
+
+# Docker
+docker-compose*.yml
+Dockerfile
+.dockerignore
+
+# OS
+.DS_Store
+Thumbs.db
