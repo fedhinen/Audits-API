@@ -70,10 +70,11 @@ COPY . .
 # Completar la instalación de Composer
 RUN composer dump-autoload --optimize --no-dev
 
-# Construir assets de frontend si no se construyeron antes
-RUN if [ -d "node_modules" ]; then \
-        npm run build 2>/dev/null || echo "Build already completed or no build script"; \
-    fi
+# Construir assets de frontend
+RUN npm run build || echo "No build script or build failed - continuing without compiled assets"
+
+# Asegurar que el directorio build existe (puede estar vacío)
+RUN mkdir -p /var/www/html/public/build && touch /var/www/html/public/build/.gitkeep
 
 # Stage final - imagen de producción
 FROM base AS production
@@ -112,7 +113,7 @@ COPY --from=build --chown=www-data:www-data /var/www/html/vendor ./vendor
 # Copiar código de aplicación
 COPY --chown=www-data:www-data . .
 
-# Copiar assets construidos
+# Copiar directorio de assets construidos (incluye .gitkeep si está vacío)
 COPY --from=build --chown=www-data:www-data /var/www/html/public/build ./public/build
 
 # Configurar permisos
