@@ -20,8 +20,13 @@ if [ "$DB_CONNECTION" = "mysql" ]; then
     echo "Database is ready!"
 fi
 
-# Ejecutar migraciones (opcional - comentar si prefieres hacerlo manual)
-# php artisan migrate --force
+# Ejecutar migraciones
+echo "Running database migrations..."
+php artisan migrate --force
+
+# Ejecutar seeders
+echo "Running database seeders..."
+php artisan db:seed --force
 
 # Cache de configuración (recomendado para producción)
 php artisan config:cache
