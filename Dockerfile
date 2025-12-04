@@ -138,8 +138,8 @@ RUN chmod +x /usr/local/bin/entrypoint.sh
 # Exponer puerto
 EXPOSE 80
 
-# Usuario www-data
-USER www-data
+# Supervisor necesita correr como root para gestionar nginx y php-fpm
+# No cambiar a www-data aquí
 
 # Usar script de entrada
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
