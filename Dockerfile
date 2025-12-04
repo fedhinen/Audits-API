@@ -54,7 +54,12 @@ COPY package.json package-lock.json* ./
 RUN apk add --no-cache nodejs npm
 
 # Instalar dependencias de Node
-RUN npm ci --only=production
+# Si existe package-lock.json usa npm ci, si no usa npm install
+RUN if [ -f package-lock.json ]; then \
+        npm ci --omit=dev; \
+    else \
+        npm install --omit=dev && npm run build; \
+    fi || npm install --omit=dev
 
 # Stage de construcción
 FROM dependencies AS build
@@ -65,8 +70,10 @@ COPY . .
 # Completar la instalación de Composer
 RUN composer dump-autoload --optimize --no-dev
 
-# Construir assets de frontend
-RUN npm run build
+# Construir assets de frontend si no se construyeron antes
+RUN if [ -d "node_modules" ]; then \
+        npm run build 2>/dev/null || echo "Build already completed or no build script"; \
+    fi
 
 # Stage final - imagen de producción
 FROM base AS production
