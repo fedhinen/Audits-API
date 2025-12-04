@@ -1,5 +1,5 @@
 # Multi-stage build para optimizar tamaño y velocidad
-FROM php:8.1-fpm-alpine AS base
+FROM php:8.2-fpm-alpine AS base
 
 # Instalar dependencias del sistema necesarias
 RUN apk add --no-cache \
@@ -36,10 +36,16 @@ WORKDIR /var/www/html
 FROM base AS dependencies
 
 # Copiar archivos de configuración de dependencias
-COPY composer.json composer.lock ./
+COPY composer.json composer.lock* ./
 
-# Instalar dependencias de PHP (sin dev para producción)
-RUN composer install --no-dev --no-scripts --no-autoloader --prefer-dist --optimize-autoloader
+# Actualizar composer.lock si es necesario y luego instalar dependencias
+# Esto regenera el lock file compatible con PHP 8.2
+RUN if [ -f composer.lock ]; then \
+        composer update --no-scripts --no-autoloader --no-dev --prefer-dist && \
+        composer install --no-dev --no-scripts --no-autoloader --prefer-dist --optimize-autoloader; \
+    else \
+        composer install --no-dev --no-scripts --no-autoloader --prefer-dist --optimize-autoloader; \
+    fi
 
 # Copiar package.json para construir assets
 COPY package.json package-lock.json* ./
