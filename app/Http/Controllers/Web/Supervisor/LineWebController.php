@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Services\CatalogService;
 use App\Models\ProductionLine;
+use Illuminate\Validation\Rule;
 
 class LineWebController extends Controller
 {
@@ -30,14 +31,40 @@ class LineWebController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
-            'code'  => 'required|string|max:20',
-            'name'  => 'required|string|max:100',
-            'area'  => 'nullable|string|max:100',
-            'active' => 'sometimes|boolean'
+            'code'  => [
+                'required',
+                'string',
+                'min:6',
+                'max:20',
+                'regex:/^[A-Za-z0-9\-]+$/',
+                'unique:production_lines,code'
+            ],
+            'name'  => [
+                'required',
+                'string',
+                'max:100'
+            ],
+            'area'  => [
+                'nullable',
+                'string',
+                'max:100'
+            ],
+            'active' => 'nullable|boolean'
+        ], [
+            'code.required' => 'El código es obligatorio.',
+            'code.regex'    => 'El código solo puede contener letras, números y guiones.',
+            'code.unique'   => 'Ya existe una línea con este código.',
+            'name.required' => 'El nombre de la línea es obligatorio.',
         ]);
 
+        // Checkbox puede no venir → normalizar
+        $data['active'] = $request->has('active');
+
         $this->catalog->createLine($data);
-        return redirect()->route('supervisor.lines.index')->with('success', 'Línea creada correctamente.');
+
+        return redirect()
+            ->route('supervisor.lines.index')
+            ->with('success', 'Línea creada correctamente.');
     }
 
     public function edit(ProductionLine $line)
@@ -48,14 +75,34 @@ class LineWebController extends Controller
     public function update(Request $request, ProductionLine $line)
     {
         $data = $request->validate([
-            'code'  => 'required|string|max:20',
-            'name'  => 'required|string|max:100',
-            'area'  => 'nullable|string|max:100',
-            'active' => 'sometimes|boolean'
+            'code'  => [
+                'required',
+                'string',
+                'min:6',
+                'max:20',
+                'regex:/^[A-Za-z0-9\-]+$/',
+                Rule::unique('production_lines', 'code')->ignore($line->id)
+            ],
+            'name'  => [
+                'required',
+                'string',
+                'max:100'
+            ],
+            'area'  => [
+                'nullable',
+                'string',
+                'max:100'
+            ],
+            'active' => 'nullable|boolean'
         ]);
 
+        $data['active'] = $request->has('active');
+
         $this->catalog->updateLine($line, $data);
-        return redirect()->route('supervisor.lines.index')->with('success', 'Línea actualizada correctamente.');
+
+        return redirect()
+            ->route('supervisor.lines.index')
+            ->with('success', 'Línea actualizada correctamente.');
     }
 
     public function destroy(ProductionLine $line)

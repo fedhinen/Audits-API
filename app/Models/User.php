@@ -23,7 +23,8 @@ class User extends Authenticatable
         'password',
         'employee_number',
         'role',
-        'active'
+        'active',
+        'verification_code',
     ];
 
     /**
@@ -67,7 +68,16 @@ class User extends Authenticatable
 
     /** Scopes **/
 
-    public function scopeSupervisors($q) { return $q->where('role', 'supervisor'); }
-    public function scopeTechnicians($q) { return $q->where('role', 'technician'); }
-    public function scopeActive($q) { return $q->where('active', true); }
+    public function scopeSupervisors($q)
+    {
+        return $q->where('role', 'supervisor');
+    }
+    public function scopeTechnicians($q)
+    {
+        return $q->where('role', 'technician');
+    }
+    public function scopeActive($q)
+    {
+        return $q->where('active', true);
+    }
 }

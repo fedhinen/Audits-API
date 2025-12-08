@@ -6,6 +6,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rule;
 
 class TechnicianWebController extends Controller
 {
@@ -23,10 +24,33 @@ class TechnicianWebController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
-            'name' => 'required|string|max:255',
-            'employee_number' => 'required|string|max:20|unique:users',
-            'email' => 'nullable|email|unique:users',
-            'password' => 'required|string|min:6',
+            'name' => [
+                'required',
+                'string',
+                'min:3',
+                'max:255'
+            ],
+            'employee_number' => [
+                'required',
+                'string',
+                'max:20',
+                'regex:/^[A-Za-z0-9\-]+$/',
+                'unique:users,employee_number'
+            ],
+            'email' => [
+                'nullable',
+                'email',
+                'max:255',
+                'unique:users,email'
+            ],
+            'password' => [
+                'required',
+                'string',
+                'min:6'
+            ],
+        ], [
+            'name.min' => 'El nombre debe tener al menos 3 caracteres.',
+            'employee_number.regex' => 'El número de empleado solo puede contener letras, números y guiones.',
         ]);
 
         $data['role'] = 'technician';
@@ -35,8 +59,11 @@ class TechnicianWebController extends Controller
 
         User::create($data);
 
-        return redirect()->route('supervisor.technicians.index')->with('success', 'Técnico registrado correctamente.');
+        return redirect()
+            ->route('supervisor.technicians.index')
+            ->with('success', 'Técnico registrado correctamente.');
     }
+
 
     public function edit(User $technician)
     {
@@ -55,16 +82,38 @@ class TechnicianWebController extends Controller
         }
 
         $data = $request->validate([
-            'name'            => 'required|string|max:255',
-            'email'           => 'required|email|unique:users,email,' . $technician->id,
-            'employee_number' => 'required|string|max:50|unique:users,employee_number,' . $technician->id,
-            'active'          => 'required|boolean',
+            'name' => [
+                'required',
+                'string',
+                'min:3',
+                'max:255'
+            ],
+            'email' => [
+                'nullable',
+                'email',
+                'max:255',
+                Rule::unique('users', 'email')->ignore($technician->id)
+            ],
+            'employee_number' => [
+                'required',
+                'string',
+                'max:20',
+                'regex:/^[A-Za-z0-9\-]+$/',
+                Rule::unique('users', 'employee_number')->ignore($technician->id)
+            ],
+            'active' => [
+                'required',
+                'boolean'
+            ]
         ]);
 
         $technician->update($data);
 
-        return redirect()->route('supervisor.technicians.index')->with('success', 'Técnico actualizado correctamente.');
+        return redirect()
+            ->route('supervisor.technicians.index')
+            ->with('success', 'Técnico actualizado correctamente.');
     }
+
 
     public function destroy(User $technician)
     {

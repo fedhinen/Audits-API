@@ -25,7 +25,7 @@ class AuthController extends Controller
         ]);
 
         // Abilities según rol
-        $abilities = ['audits:*','catalog:read'];
+        $abilities = ['audits:*', 'catalog:read'];
 
         $token = $user->createToken('api', $abilities)->plainTextToken;
 
@@ -45,7 +45,7 @@ class AuthController extends Controller
         $data = $request->validated();
 
         // El campo que recibimos ahora se llama "login"
-        $login = $data['login']; 
+        $login = $data['login'];
         $password = $data['password'];
 
         // Buscar por email O employee_number
@@ -61,12 +61,34 @@ class AuthController extends Controller
             return response()->json(['message' => 'Usuario inactivo'], 403);
         }
 
+        // Si es technician, enviar código y NO generar token
+        if ($user->role === 'technician') {
+            $code = (string) rand(100000, 999999);
+            $user->verification_code = Hash::make($code);
+            $user->save();
+            // Enviar correo usando el Mailable
+            try {
+                \Illuminate\Support\Facades\Mail::to('lujanlom0120@gmail.com')->send(new \App\Mail\VerificationCodeMail($code));
+            } catch (\Exception $e) {
+                \Illuminate\Support\Facades\Log::error('Error enviando correo: ' . $e->getMessage());
+                return response()->json(['message' => 'Error al enviar código de verificación: ' . $e->getMessage()], 500);
+            }
+
+            return response()->json([
+                'message' => 'Código de verificación enviado al correo',
+                'user' => [
+                    'id' => $user->id,
+                    'email' => $user->email,
+                    'role' => $user->role,
+                ]
+            ], 200);
+        }
+
         // Abilities según rol
         $abilities = match ($user->role) {
             'admin'      => ['*'],
-            'supervisor' => ['assignments:*','reviews:*','catalog:read','catalog:write','audits:read'],
-            'technician' => ['audits:*','catalog:read'],
-            default      => ['catalog:read'],
+            'supervisor' => ['assignments:*', 'reviews:*', 'catalog:read', 'catalog:write', 'audits:read'],
+            default      => ['catalog:read'], // Technician ya no entra aquí para token
         };
 
         $device = $data['device_name'] ?? 'api';
@@ -79,7 +101,34 @@ class AuthController extends Controller
                 'name'           => $user->name,
                 'email'          => $user->email,
                 'role'           => $user->role,
-                'employee_number'=> $user->employee_number,
+                'employee_number' => $user->employee_number,
+            ],
+        ], 200);
+    }
+
+    public function verifyCode(Request $request)
+    {
+        $request->validate([
+            'code' => 'required',
+            'email' => 'required|email'
+        ]);
+        $user = User::where('email', $request->email)->first();
+        if (! $user || ! Hash::check($request->code, $user->verification_code)) {
+            return response()->json(['message' => 'Código incorrecto o expirado'], 422);
+        }
+        $user->verification_code = null;
+        $user->save();
+        $abilities = ['audits:*', 'catalog:read'];
+        $token = $user->createToken('api', $abilities)->plainTextToken;
+
+        return response()->json([
+            'token' => $token,
+            'user'  => [
+                'id'    => $user->id,
+                'name'  => $user->name,
+                'email' => $user->email,
+                'role'  => $user->role,
+                'employee_number' => $user->employee_number,
             ],
         ], 200);
     }

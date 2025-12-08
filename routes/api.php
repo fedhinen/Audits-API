@@ -37,70 +37,71 @@ Route::prefix('v1')->group(function () {
 
     Route::post('auth/register', [AuthController::class, 'register']);
     Route::post('auth/login',    [AuthController::class, 'login']);
+    Route::post('auth/verify-code', [AuthController::class, 'verifyCode']);
 
-Route::middleware('auth:sanctum')->group(function () {
-    Route::post('auth/logout', [AuthController::class, 'logout']);
-    Route::get('auth/me',     [AuthController::class, 'me']);
-   
-    
-    //PRODUCTION LINES
-    Route::get('/lines', [ProductionLineController::class, 'index']);
-    Route::post('/lines', [ProductionLineController::class, 'store']);
-    Route::get('/lines/{line}', [ProductionLineController::class, 'show']);
-    Route::put('/lines/{line}', [ProductionLineController::class, 'update']);
-    Route::delete('/lines/{line}', [ProductionLineController::class, 'destroy']);
+    Route::middleware('auth:sanctum')->group(function () {
+        Route::post('auth/logout', [AuthController::class, 'logout']);
+        Route::get('auth/me',     [AuthController::class, 'me']);
 
-    //TOOLS
-    Route::get('/tools', [ToolController::class, 'index']);
-    Route::post('/tools', [ToolController::class, 'store']);
-    Route::get('/tools/{tool}', [ToolController::class, 'show']);
-    Route::put('/tools/{tool}', [ToolController::class, 'update']);
-    Route::delete('/tools/{tool}', [ToolController::class, 'destroy']);
 
-    //EMPLOYEES
-    Route::get('/employees', [EmployeeController::class, 'index']);
-    Route::post('/employees', [EmployeeController::class, 'store']);
-    Route::get('/employees/{employee}', [EmployeeController::class, 'show']);
-    Route::put('/employees/{employee}', [EmployeeController::class, 'update']);
-    Route::delete('/employees/{employee}', [EmployeeController::class, 'destroy']);
+        //PRODUCTION LINES
+        Route::get('/lines', [ProductionLineController::class, 'index']);
+        Route::post('/lines', [ProductionLineController::class, 'store']);
+        Route::get('/lines/{line}', [ProductionLineController::class, 'show']);
+        Route::put('/lines/{line}', [ProductionLineController::class, 'update']);
+        Route::delete('/lines/{line}', [ProductionLineController::class, 'destroy']);
 
-    Route::get('/employees/validate', [EmployeeController::class, 'validateNumber']);
+        //TOOLS
+        Route::get('/tools', [ToolController::class, 'index']);
+        Route::post('/tools', [ToolController::class, 'store']);
+        Route::get('/tools/{tool}', [ToolController::class, 'show']);
+        Route::put('/tools/{tool}', [ToolController::class, 'update']);
+        Route::delete('/tools/{tool}', [ToolController::class, 'destroy']);
 
-    //ASSIGNMENTS
-    Route::get('assignments',              [AssignmentController::class, 'index']);
-    Route::post('assignments',             [AssignmentController::class, 'store']);
-    Route::get('assignments/{assignment}', [AssignmentController::class, 'show']);
-    Route::put('assignments/{assignment}', [AssignmentController::class, 'update']);
-    Route::patch('assignments/{assignment}/status', [AssignmentController::class, 'updateStatus']);
-    Route::delete('assignments/{assignment}', [AssignmentController::class, 'destroy']);
+        //EMPLOYEES
+        // Route::get('/employees', [EmployeeController::class, 'index']);
+        // Route::post('/employees', [EmployeeController::class, 'store']);
+        // Route::get('/employees/{employee}', [EmployeeController::class, 'show']);
+        // Route::put('/employees/{employee}', [EmployeeController::class, 'update']);
+        // Route::delete('/employees/{employee}', [EmployeeController::class, 'destroy']);
 
-    // ASSIGNMENTS TOOLS
-    Route::get('assignments/{assignment}/tools',            [AssignmentToolController::class, 'index']);
-    Route::post('assignments/{assignment}/tools',           [AssignmentToolController::class, 'attach']);
-    Route::delete('assignments/{assignment}/tools/{tool}',  [AssignmentToolController::class, 'detach']);
+        // Route::get('/employees/validate', [EmployeeController::class, 'validateNumber']);
 
-    //AUDITS
-    Route::get('audits',              [AuditController::class, 'index']);
-    Route::post('audits',             [AuditController::class, 'store']);   
-    Route::get('audits/{audit}',      [AuditController::class, 'show']);
-    Route::put('audits/{audit}',      [AuditController::class, 'update']);
-    Route::post('audits/{audit}/submit', [AuditController::class, 'submit']);
+        //ASSIGNMENTS
+        Route::get('assignments',              [AssignmentController::class, 'index']);
+        Route::post('assignments',             [AssignmentController::class, 'store']);
+        Route::get('assignments/{assignment}', [AssignmentController::class, 'show']);
+        Route::put('assignments/{assignment}', [AssignmentController::class, 'update']);
+        Route::patch('assignments/{assignment}/status', [AssignmentController::class, 'updateStatus']);
+        Route::delete('assignments/{assignment}', [AssignmentController::class, 'destroy']);
 
-    //AUDIT ITEMS
-    Route::get('audits/{audit}/items',  [AuditItemController::class, 'index']);
-    Route::post('audits/{audit}/items', [AuditItemController::class, 'store']);
-    Route::put('audit-items/{item}',    [AuditItemController::class, 'update']);
+        // ASSIGNMENTS TOOLS
+        Route::get('assignments/{assignment}/tools',            [AssignmentToolController::class, 'index']);
+        Route::post('assignments/{assignment}/tools',           [AssignmentToolController::class, 'attach']);
+        Route::delete('assignments/{assignment}/tools/{tool}',  [AssignmentToolController::class, 'detach']);
 
-    //AUDIT PHOTOS
-    Route::get('audit-items/{item}/photos',    [AuditPhotoController::class, 'index']);
-    Route::post('audit-items/{item}/photos',   [AuditPhotoController::class, 'store']);
-    Route::delete('audit-photos/{photo}',      [AuditPhotoController::class, 'destroy']);
+        //AUDITS
+        Route::get('audits',              [AuditController::class, 'index']);
+        Route::post('audits',             [AuditController::class, 'store']);
+        Route::get('audits/{audit}',      [AuditController::class, 'show']);
+        Route::put('audits/{audit}',      [AuditController::class, 'update']);
+        Route::post('audits/{audit}/submit', [AuditController::class, 'submit']);
 
-    // REVIEWS
-    Route::get('audits/{audit}/reviews',  [AuditReviewController::class, 'index']);
-    Route::post('audits/{audit}/reviews', [AuditReviewController::class, 'store']);
+        //AUDIT ITEMS
+        Route::get('audits/{audit}/items',  [AuditItemController::class, 'index']);
+        Route::post('audits/{audit}/items', [AuditItemController::class, 'store']);
+        Route::put('audit-items/{item}',    [AuditItemController::class, 'update']);
 
-    // REOOPEN IF NEEDED CHANGES
-    Route::post('audits/{audit}/reopen',  [AuditReviewController::class, 'reopen']);
+        //AUDIT PHOTOS
+        Route::get('audit-items/{item}/photos',    [AuditPhotoController::class, 'index']);
+        Route::post('audit-items/{item}/photos',   [AuditPhotoController::class, 'store']);
+        Route::delete('audit-photos/{photo}',      [AuditPhotoController::class, 'destroy']);
+
+        // REVIEWS
+        Route::get('audits/{audit}/reviews',  [AuditReviewController::class, 'index']);
+        Route::post('audits/{audit}/reviews', [AuditReviewController::class, 'store']);
+
+        // REOOPEN IF NEEDED CHANGES
+        Route::post('audits/{audit}/reopen',  [AuditReviewController::class, 'reopen']);
     });
 });
