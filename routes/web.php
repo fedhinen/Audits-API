@@ -21,6 +21,30 @@ use App\Http\Controllers\Web\Supervisor\TechnicianWebController;
 |
 */
 
+// Health check endpoint - no requiere sesión ni nada
+Route::get('/health', function () {
+    try {
+        // Verificar conexión a BD
+        \DB::connection()->getPdo();
+        $dbStatus = 'connected';
+    } catch (\Exception $e) {
+        $dbStatus = 'error: ' . $e->getMessage();
+    }
+    
+    return response()->json([
+        'status' => 'ok',
+        'php_version' => PHP_VERSION,
+        'laravel_version' => app()->version(),
+        'environment' => config('app.env'),
+        'debug' => config('app.debug'),
+        'database' => $dbStatus,
+        'storage_writable' => is_writable(storage_path()),
+        'cache_writable' => is_writable(storage_path('framework/cache')),
+        'session_driver' => config('session.driver'),
+        'cache_driver' => config('cache.default'),
+    ]);
+});
+
 Route::get('/', function () {
     return view('welcome');
 });
