@@ -25,6 +25,13 @@ use App\Http\Controllers\AuthController;
 |
 */
 
+Route::get('/health', function () {
+    return response()->json([
+        'status' => 'ok',
+        'timestamp' => now()->toIso8601String()
+    ]);
+});
+
 Route::get('/user', function (Request $request) {
     $user = "Soy Navarrete";
     return $response = [
