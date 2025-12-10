@@ -79,22 +79,29 @@ php artisan migrate --force || {
 echo "Running database seeders..."
 php artisan db:seed --force || echo "Seeding failed or already seeded."
 
-# Cache de configuración (recomendado para producción)
-echo "Caching configuration..."
-php artisan config:cache || {
-    echo "Config cache failed! Running without config cache."
+# Cache de configuración solo si NO estamos en modo debug
+if [ "$APP_DEBUG" = "true" ] || [ "$APP_DEBUG" = "1" ]; then
+    echo "Debug mode enabled - skipping config cache..."
     php artisan config:clear
-}
-
-php artisan route:cache || {
-    echo "Route cache failed! Running without route cache."
     php artisan route:clear
-}
-
-php artisan view:cache || {
-    echo "View cache failed! Running without view cache."
     php artisan view:clear
-}
+else
+    echo "Caching configuration for production..."
+    php artisan config:cache || {
+        echo "Config cache failed! Running without config cache."
+        php artisan config:clear
+    }
+
+    php artisan route:cache || {
+        echo "Route cache failed! Running without route cache."
+        php artisan route:clear
+    }
+
+    php artisan view:cache || {
+        echo "View cache failed! Running without view cache."
+        php artisan view:clear
+    }
+fi
 
 # Crear enlace simbólico de storage si no existe
 if [ ! -L /var/www/html/public/storage ]; then
